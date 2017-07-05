@@ -40,23 +40,22 @@ function! ctrlp#projects#init() abort
     return []
   endif
   if !filereadable(s:projects_vim)
-    call writefile([
-    \ "\" projects in Documents globpath",
-    \ "\"let g:projects = [",
-    \ "\"\\  [\"myproject\", \"**/*.txt\"]",
-    \ "\"\\]"
-    \], s:projects_vim)
+    call writefile(["let g:projects = {", "\\}"], s:projects_vim)
   endif
   exec "source ". s:projects_vim
   if !exists("g:projects")
-    let g:projects = []
+    let g:projects = {}
   endif
-  let files = [ "projects.vim" ]
+  let project = s:get_project()
+  exec "cd ". s:documents_dir
   try
-    exec "cd ". s:documents_dir
-    for pair in g:projects
-      let files = files + split(globpath(pair[0],  pair[1],  1), "\n")
-    endfor
+    let files = ["projects.vim"]
+    if has_key(g:projects, project)
+      for dir in g:projects[project]
+        let path  = s:documents_dir. "/". dir
+        let files = files + split(globpath(dir, "**",  1), "\n")
+      endfor
+    endif
   finally
     cd -
   endtry
@@ -65,7 +64,38 @@ endfunction
 
 function! ctrlp#projects#accept(mode, str) abort
   let file = s:documents_dir. "/". a:str
+  if a:str == "projects.vim"
+    call s:add_projects(file)
+  endif
   call ctrlp#acceptfile(0, file)
+endfunction
+
+function s:get_project()
+  let paths = split(expand("%:p:h"), "/")
+  let index = index(paths, "Documents")
+  if index >= 0
+    return paths[index + 1]
+  end
+  return ""
+endfunction
+
+function s:add_projects(file)
+  let separator = "\"----------"
+  let lines = readfile(a:file)
+  let index = index(lines, separator)
+  if index >= 0
+    let lines = lines[0:index]
+  else
+    let lines = add(lines, separator)
+  end
+  let dirs = split(globpath(s:documents_dir, "*"), "\n")
+  for dir in dirs
+    if isdirectory(dir)
+      let line  = "\"\\ \"". fnamemodify(dir, ':t'). "\": [],"
+      let lines = add(lines, line)
+    endif
+  endfor
+  call writefile(lines, a:file)
 endfunction
 
 let &cpo = s:save_cpo
