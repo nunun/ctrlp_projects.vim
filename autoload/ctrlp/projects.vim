@@ -22,13 +22,14 @@ endif
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
 
 let s:documents_dir = $HOME. '/Documents'
-if has("win64") || has("win32")
+if has("win64") || has("win32") " NOTE: windows MyDocuments workaround
   if !isdirectory(s:documents_dir)
     let s:documents_dir = system("reg query \"HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders\" /v \"Personal\"")
     let s:documents_dir = substitute(s:documents_dir, '^.*REG_SZ\s\+\(.*\)\n\n', '\1', '')
   endif
 endif
-let s:projects_vim = s:documents_dir. '/projects.vim'
+
+let s:projects_vim  = s:documents_dir. '/projects.vim'
 
 function! ctrlp#projects#id() abort
   return s:id
@@ -39,25 +40,25 @@ function! ctrlp#projects#init() abort
     echoerr "Documents directory not found: ". s:documents_dir
     return []
   endif
-  if !filereadable(s:projects_vim)
-    call writefile(["let g:projects = {", "\\}"], s:projects_vim)
-  endif
-  exec "source ". s:projects_vim
-  if !exists("g:projects")
-    let g:projects = {}
-  endif
-  let project = s:get_project()
-  exec "cd ". s:documents_dir
+
+  let files = ["projects.vim"]
+  for dir in split(globpath(s:documents_dir, "*",  1), "\n")
+    if isdirectory(dir)
+      call add(files, fnamemodify(dir, ":t"))
+    endif
+  endfor
+
+  let projects = s:read_projects_vim(s:projects_vim)
+  let current  = s:get_current_project()
+  exec "lcd ". s:documents_dir
   try
-    let files = ["projects.vim"]
-    if has_key(g:projects, project)
-      for dir in g:projects[project]
-        let path  = s:documents_dir. "/". dir
-        let files = files + split(globpath(dir, "**",  1), "\n")
+    if has_key(projects, current)
+      for dir in projects[current]
+        let files = files + split(globpath("", dir,  1), "\n")
       endfor
     endif
   finally
-    cd -
+    lcd -
   endtry
   return files
 endfunction
@@ -65,37 +66,62 @@ endfunction
 function! ctrlp#projects#accept(mode, str) abort
   let file = s:documents_dir. "/". a:str
   if a:str == "projects.vim"
-    call s:add_projects(file)
+    call s:refresh_project_vim(s:projects_vim, s:documents_dir)
+    call ctrlp#acceptfile(0, s:projects_vim)
+  else
+    call ctrlp#acceptfile(0, file)
+    exec "lcd ". s:documents_dir. "/". s:get_project(file)
   endif
-  call ctrlp#acceptfile(0, file)
 endfunction
 
-function s:get_project()
-  let paths = split(expand("%:p:h"), "/")
-  let index = index(paths, "Documents")
-  if index >= 0
-    return paths[index + 1]
-  end
-  return ""
+"------------------------------------------------------------------------------
+
+function s:read_projects_vim(projects_vim)
+  if !filereadable(s:projects_vim)
+    call writefile(["let g:projects = {", "\\}"], a:projects_vim)
+  endif
+  exec "source ". s:projects_vim
+  if !exists("g:projects")
+    return {}
+  endif
+  return g:projects
 endfunction
 
-function s:add_projects(file)
+function s:refresh_project_vim(projects_vim, projects_dir)
   let separator = "\"----------"
-  let lines = readfile(a:file)
+  let lines = readfile(a:projects_vim)
   let index = index(lines, separator)
   if index >= 0
     let lines = lines[0:index]
   else
     let lines = add(lines, separator)
   end
-  let dirs = split(globpath(s:documents_dir, "*"), "\n")
+  let dirs = split(globpath(a:projects_dir, "*"), "\n")
   for dir in dirs
     if isdirectory(dir)
-      let line  = "\"\\ \"". fnamemodify(dir, ':t'). "\": [],"
-      let lines = add(lines, line)
+      let name  = fnamemodify(dir, ':t')
+      let lines = add(lines, "\"\\ \"". name. "\": [")
+      let lines = add(lines, "\"\\   \"". name. "/**\",")
+      let lines = add(lines, "\"\\ ],")
     endif
   endfor
-  call writefile(lines, a:file)
+  let lines = add(lines, "\"\\ \"[default]\": [")
+  let lines = add(lines, "\"\\   \"default/**\",")
+  let lines = add(lines, "\"\\ ],")
+  call writefile(lines, a:projects_vim)
+endfunction
+
+function s:get_current_project()
+  return s:get_project(fnamemodify(bufname("%"), ":p"))
+endfunction
+
+function s:get_project(file)
+  let paths = split(fnamemodify(a:file, ":p:h"), "/")
+  let index = index(paths, "Documents")
+  if index >= 0 && index < (len(paths) - 1)
+    return paths[index + 1]
+  end
+  return "[defualt]"
 endfunction
 
 let &cpo = s:save_cpo
