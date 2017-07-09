@@ -7,7 +7,7 @@ set cpo&vim
 
 command! CtrlPProjects call ctrlp#init(ctrlp#projects#id())
 
-nmap <C-p><C-p> :CtrlPProjects<CR>
+nmap s<C-p> :CtrlPProjects<CR>
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
