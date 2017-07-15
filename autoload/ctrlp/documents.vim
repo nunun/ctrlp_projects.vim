@@ -20,6 +20,7 @@ else
   let g:ctrlp_ext_vars = [s:documents_var]
 endif
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
+let s:prefix = "ctrlp "
 
 let s:documents_dir = $HOME. '/Documents'
 if has("win64") || has("win32") " NOTE: windows MyDocuments workaround
@@ -41,7 +42,8 @@ function! ctrlp#documents#init() abort
   let files = []
   for dir in split(globpath(s:documents_dir, "*",  1), "\n")
     if isdirectory(dir)
-      call add(files, fnamemodify(dir, ":t"))
+      let path = s:prefix. fnamemodify(dir, ":t")
+      call add(files, path)
     endif
   endfor
   return files
@@ -49,11 +51,10 @@ endfunction
 
 function! ctrlp#documents#accept(mode, str) abort
   let file = s:documents_dir. "/". a:str
-  if isdirectory(file)
+  let path = file[strlen(s:prefix):]
+  if isdirectory(path)
     call ctrlp#exit()
-    exec "CtrlP ". file
-  else
-    call ctrlp#acceptfile(0, file)
+    exec "CtrlP ". path
   endif
 endfunction
 
