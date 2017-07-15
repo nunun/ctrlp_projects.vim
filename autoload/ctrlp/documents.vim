@@ -20,7 +20,7 @@ else
   let g:ctrlp_ext_vars = [s:documents_var]
 endif
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
-let s:prefix = "ctrlp "
+let s:prefix = "ctrlp ~/Documents/"
 
 let s:documents_dir = $HOME. '/Documents'
 if has("win64") || has("win32") " NOTE: windows MyDocuments workaround
