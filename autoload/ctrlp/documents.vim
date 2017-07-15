@@ -42,19 +42,19 @@ function! ctrlp#documents#init() abort
   let files = []
   for dir in split(globpath(s:documents_dir, "*",  1), "\n")
     if isdirectory(dir)
-      let path = s:prefix. fnamemodify(dir, ":t")
-      call add(files, path)
+      let file = s:prefix. fnamemodify(dir, ":t")
+      call add(files, file)
     endif
   endfor
   return files
 endfunction
 
 function! ctrlp#documents#accept(mode, str) abort
-  let file = s:documents_dir. "/". a:str
-  let path = file[strlen(s:prefix):]
-  if isdirectory(path)
+  let str  = a:str[strlen(s:prefix):]
+  let file = s:documents_dir. "/". str
+  if isdirectory(file)
     call ctrlp#exit()
-    exec "CtrlP ". path
+    exec "CtrlP ". file
   endif
 endfunction
 
