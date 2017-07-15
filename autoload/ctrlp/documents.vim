@@ -28,7 +28,7 @@ if has("win64") || has("win32") " NOTE: windows MyDocuments workaround
     let s:documents_dir = substitute(s:documents_dir, '^.*REG_SZ\s\+\(.*\)\n\n', '\1', '')
   endif
 endif
-let s:prefix = "ctrlp ". fnamemodify(s:documents_dir, ":~")
+let s:prefix = "CtrlP ". fnamemodify(s:documents_dir, ":~")
 
 function! ctrlp#documents#id() abort
   return s:id
@@ -60,84 +60,3 @@ endfunction
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
-
-"let files = ["documents.vim"]
-" current project files
-"let current = s:get_current_dir_project()
-"if current != "[default]"
-"  exec "lcd ". s:documents_dir
-"  try
-"    let files = files + split(globpath(current, "**",  1), "\n")
-"  finally
-"    lcd -
-"  endtry
-"endif
-" related project files
-"let documents = s:read_documents_vim(s:documents_vim)
-"exec "lcd ". s:documents_dir
-"try
-"  if has_key(documents, current)
-"    for dir in documents[current]
-"      let files = files + split(globpath("", dir,  1), "\n")
-"    endfor
-"  endif
-"finally
-"  lcd -
-"endtry
-"let s:documents_vim  = s:documents_dir. '/documents.vim'
-"function s:refresh_project_vim(documents_vim, documents_dir)
-"  let separator = "\"----------"
-"  let lines = readfile(a:documents_vim)
-"  let index = index(lines, separator)
-"  if index >= 0
-"    let lines = lines[0:index]
-"  else
-"    let lines = add(lines, separator)
-"  end
-"  let dirs = split(globpath(a:documents_dir, "*"), "\n")
-"  for dir in dirs
-"    if isdirectory(dir)
-"      let name  = fnamemodify(dir, ':t')
-"      let lines = add(lines, "\"\\ \"". name. "\": [")
-"      let lines = add(lines, "\"\\   \"". name. "/**\",")
-"      let lines = add(lines, "\"\\ ],")
-"    endif
-"  endfor
-"  let lines = add(lines, "\"\\ \"[default]\": [")
-"  let lines = add(lines, "\"\\   \"default/**\",")
-"  let lines = add(lines, "\"\\ ],")
-"  call writefile(lines, a:documents_vim)
-"endfunction
-"if a:str == "documents.vim"
-"  call s:refresh_project_vim(s:documents_vim, s:documents_dir)
-"  call ctrlp#acceptfile(0, s:documents_vim)
-"function s:read_documents_vim(documents_vim)
-"  if !filereadable(s:documents_vim)
-"    call writefile(["let g:documents = {", "\\}"], a:documents_vim)
-"  endif
-"  exec "source ". s:documents_vim
-"  if !exists("g:documents")
-"    return {}
-"  endif
-"  return g:documents
-"endfunction
-"------------------------------------------------------------------------------
-"function s:get_current_buf_project()
-"  return s:get_project(fnamemodify(bufname("%"), ":p"))
-"endfunction
-"function s:get_current_dir_project()
-"  return s:get_dir_project(getcwd())
-"endfunction
-"function s:get_file_project(file)
-"  return s:get_dir_project(fnamemodify(a:file, ":p:h"))
-"endfunction
-"function s:get_dir_project(dir)
-"  let paths = split(a:dir, "/")
-"  let index = index(paths, "Documents")
-"echo paths
-"echo index
-"  if index >= 0 && index < (len(paths) - 1)
-"    return paths[index + 1]
-"  end
-"  return "[defualt]"
-"endfunction
