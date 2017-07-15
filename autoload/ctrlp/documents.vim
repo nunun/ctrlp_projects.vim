@@ -28,7 +28,7 @@ if has("win64") || has("win32") " NOTE: windows MyDocuments workaround
     let s:documents_dir = substitute(s:documents_dir, '^.*REG_SZ\s\+\(.*\)\n\n', '\1', '')
   endif
 endif
-let s:prefix = "CtrlP ". fnamemodify(s:documents_dir, ":~")
+let s:prefix = ":CtrlP ". fnamemodify(s:documents_dir, ":~")
 
 function! ctrlp#documents#id() abort
   return s:id
