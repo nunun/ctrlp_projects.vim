@@ -20,15 +20,15 @@ else
   let g:ctrlp_ext_vars = [s:documents_var]
 endif
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
-let s:prefix = "ctrlp ~/Documents/"
 
-let s:documents_dir = $HOME. '/Documents'
+let s:documents_dir = fnamemodify("~/Documents", ":p")
 if has("win64") || has("win32") " NOTE: windows MyDocuments workaround
   if !isdirectory(s:documents_dir)
     let s:documents_dir = system("reg query \"HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders\" /v \"Personal\"")
     let s:documents_dir = substitute(s:documents_dir, '^.*REG_SZ\s\+\(.*\)\n\n', '\1', '')
   endif
 endif
+let s:prefix = "ctrlp ". fnamemodify(s:documents_dir, ":~")
 
 function! ctrlp#documents#id() abort
   return s:id
