@@ -52,8 +52,8 @@ endfunction
 function! ctrlp#documents#accept(mode, str) abort
   let str  = a:str[strlen(s:prefix):]
   let file = s:documents_dir. "/". str
-  if !s:ctrlp_nest(file, [""])
-    call s:ctrlp_nest(file, g:ctrlp_documents_forwards)
+  if !s:ctrlp_nest(file, g:ctrlp_documents_forwards)
+    call s:ctrlp_nest(file, [""])
   endif
 endfunction
 
