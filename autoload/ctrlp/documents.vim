@@ -62,7 +62,11 @@ function s:ctrlp_nest(file, fwds)
     let file_fwd = a:file. '/'. fwd
     if isdirectory(file_fwd)
       call ctrlp#exit()
-      exec "CtrlP ". file_fwd
+      if g:ctrlp_documents_filer_mode
+        exec "tabnew ". file_fwd
+      else
+        exec "CtrlP ". file_fwd
+      endif
       return 1
     endif
   endfor
