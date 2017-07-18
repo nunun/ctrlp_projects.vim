@@ -52,10 +52,21 @@ endfunction
 function! ctrlp#documents#accept(mode, str) abort
   let str  = a:str[strlen(s:prefix):]
   let file = s:documents_dir. "/". str
-  if isdirectory(file)
-    call ctrlp#exit()
-    exec "CtrlP ". file
+  if !s:ctrlp_nest(file, [""])
+    call s:ctrlp_nest(file, g:ctrlp_documents_forwards)
   endif
+endfunction
+
+function s:ctrlp_nest(file, fwds)
+  for fwd in a:fwds
+    let file_fwd = a:file. '/'. fwd
+    if isdirectory(file_fwd)
+      call ctrlp#exit()
+      exec "CtrlP ". file_fwd
+      return 1
+    endif
+  endfor
+  return 0
 endfunction
 
 let &cpo = s:save_cpo
