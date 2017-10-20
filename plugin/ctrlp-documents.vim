@@ -8,6 +8,9 @@ set cpo&vim
 if !exists("g:ctrlp_documents_filer_mode")
     let g:ctrlp_documents_filer_mode = 0
 endif
+if !exists("g:ctrlp_documents_smart_home")
+    let g:ctrlp_documents_smart_home = 0
+endif
 if !exists("g:ctrlp_documents_forwards")
     let g:ctrlp_documents_forwards = []
 endif

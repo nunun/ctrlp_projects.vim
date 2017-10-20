@@ -64,7 +64,11 @@ function s:ctrlp_nest(file, fwds)
     if isdirectory(file_fwd)
       call ctrlp#exit()
       if g:ctrlp_documents_filer_mode
-        exec "tabnew ". file_fwd
+        if g:ctrlp_documents_smart_home && expand('%:p') == fnamemodify('~', ':p')
+            exec "e ". file_fwd
+        else
+            exec "tabnew ". file_fwd
+        endif
       else
         exec "CtrlP ". file_fwd
       endif
